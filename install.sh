@@ -59,14 +59,6 @@ echo "========== Update Aptitude ==========="
 sudo apt-get update -y
 # sudo apt-get upgrade
 
-if [ ${OS_TYPE} == "dride-plus" ]; then
-	echo "========== Installing build-essential ============"
-	sudo apt-get install build-essential -y
-
-	echo "========== Installing libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev libjasper-dev python2.7-dev ============"
-	sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev libjasper-dev python2.7-dev -y
-fi
-
 echo "========== Installing gpac ============"
 # provides MP4Box
 sudo apt-get install gpac -y
@@ -80,25 +72,11 @@ echo "========== Setup libav  ============"
 sudo apt-get install ffmpeg -y
 sudo ln -s /usr/bin/ffmpeg /usr/bin/avconv
 
-
 echo "========== Installing Node ============"
 wget -O - https://raw.githubusercontent.com/sdesalas/node-pi-zero/master/install-node-v8.9.0.sh | bash
 
-
 echo "========== Installing pip ============"
 sudo apt-get install python-pip -y
-
-
-if [ ${OS_TYPE} == "dride-plus" ]; then
-	echo "========== Installing Numpy ============"
-	sudo pip install numpy
-fi
-
-
-if [ ${OS_TYPE} == "dride-plus" ]; then
-	echo "========== Install picamera  ============"
-	sudo apt-get install python3-picamera
-fi
 
 # enable camera on raspi-config and allocate more ram to the GPU
 echo "" >> /boot/config.txt
@@ -106,18 +84,6 @@ echo "#enable piCamera" >> /boot/config.txt
 echo "start_x=1" >> /boot/config.txt
 echo "gpu_mem=144" >> /boot/config.txt
 echo "dtparam=spi=on" >> /boot/config.txt
-
-
-if [ ${OS_TYPE} == "dride-plus" ]; then
-	echo "========== Install mpg123  ============"
-	sudo apt-get install mpg123 -y
-fi
-
-
-echo "========== Install pyserial  ============"
-sudo pip install pyserial
-
-
 
 # express on startup
 sudo systemctl enable ws
@@ -128,50 +94,6 @@ sudo systemctl enable record
 #sudo systemctl enable ble
 #sudo systemctl enable led
 #sudo systemctl enable rtc
-
-if [ ${OS_TYPE} == "dride-plus" ]; then
-	## GPS  https://www.raspberrypi.org/forums/viewtopic.php?p=947968#p947968
-	echo "========== Install GPS  ============"
-
-fi
-
-
-if [ ${OS_TYPE} == "dride-plus" ]; then
-	echo "========== Downloading and installing OpenCV ============"
-	cd /
-	# git clone https://github.com/Itseez/opencv.git --depth 1
-	wget -c -O "opencv-3.1.0.zip" "https://github.com/Itseez/opencv/archive/3.1.0.zip"
-	sudo apt-get install unzip
-	unzip -q -n "opencv-3.1.0.zip"
-
-	cd opencv-3.1.0
-	echo "======== Building OpenCV ============"
-	cd /home/opencv-3.1.0
-	mkdir build
-	cd build
-	cmake -D CMAKE_BUILD_TYPE=RELEASE -D BUILD_EXAMPLES=OFF -D BUILD_opencv_apps=OFF -D BUILD_DOCS=OFF -D BUILD_PERF_TESTS=OFF -D BUILD_TESTS=OFF -D CMAKE_INSTALL_PREFIX=/usr/local ..
-	echo "==>>>====== This might take a long time.. ============"
-	make -j1
-
-	sudo make install
-	sudo ldconfig
-
-	# remove the installation file
-	cd /
-	sudo rm opencv-3.1.0.zip
-
-	# TODO: Add a test if openCV was installed correctly
-fi
-
-if [ ${OS_TYPE} == "dride-plus" ]; then
-	echo "========== Setup sound to I2S  ============"
-	sudo curl -sS https://dride.io/code/i2samp.sh  | bash
-fi
-
-if [ ${OS_TYPE} == "dride-plus" ]; then
-	echo "========== Setup mic  ============"
-	# https://learn.adafruit.com/adafruit-i2s-mems-microphone-breakout/raspberry-pi-wiring-and-test
-fi
 
 echo "========== Setup RTC  ============"
 # https://learn.adafruit.com/adding-a-real-time-clock-to-raspberry-pi/set-rtc-time
@@ -202,11 +124,12 @@ sudo apt-get install python-smbus i2c-tools -y
 
 
 echo "========== Install Dride-core   ============"
-cd /home
+sudo cp files/dride.zip /home/
+cd /home/
 # https://s3.amazonaws.com/dride/releases/dride/latest.zip
-sudo wget -c -O "core.zip" "https://s3.amazonaws.com/dride/releases/dride/latest.zip"
-sudo unzip "core.zip"
-sudo rm -R core.zip
+# sudo wget -c -O "core.zip" "https://s3.amazonaws.com/dride/releases/dride/latest.zip"
+sudo unzip "dride.zip"
+sudo rm -R dride.zip
 cd core
 echo '{"name":"drideOS","version":"1.0.0","settings":{"debug":false,"videoRecord":true,"flipVideo":true,"gps":false,"speaker":false,"mic":false,"indicator":false,"resolution":"1080","fps":"25","clipLength":"1","gSensorSensitivity":"medium","netwrok":{"ssid":"dashcam","password":"dashcam"}}}' | sudo tee /home/core/config.json
 sudo chmod 777 config.json
@@ -219,15 +142,13 @@ sudo mkdir -p /dride/clip /dride/thumb /dride/tmp_clip
 sudo chmod 777 -R /dride/
 sudo chmod 777 -R /home/core/modules/settings/
 # make gps position writable
-sudo chmod +x /home/core/daemons/gps/position
-
+# sudo chmod +x /home/core/daemons/gps/position
 
 # make the firmware dir writable
 sudo chmod 777 -R /home/core/firmware/
 
 # make the state dir writable
 sudo chmod 777 -R /home/core/state/
-
 
 # run npm install on dride-ws
 cd /home/core/dride-ws
