@@ -3,7 +3,7 @@
 [Service]
 Type=simple
 User=root
-ExecStart=/root/fbcp-ili9341/build/fbcp-ili9341
+ExecStart=/home/pi/fbcp-ili9341/build/fbcp-ili9341
 Restart=on-failure
 RestartSec=5s
 
