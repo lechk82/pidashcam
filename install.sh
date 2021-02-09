@@ -124,6 +124,7 @@ sudo apt-get install python-smbus i2c-tools -y
 
 
 echo "========== Install Dride-core   ============"
+cd ~/pidashcam
 sudo cp files/dride.zip /home/
 cd /home/
 # https://s3.amazonaws.com/dride/releases/dride/latest.zip
