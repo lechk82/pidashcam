@@ -178,7 +178,7 @@ sudo rm cronJobs
 echo "========== Install Web  ============"
 
 cd /home/pi/pidashcam
-sudo cp files/web/* /home/core/
+sudo cp files/web/* /dride/
 
 echo "========== Install Display  ============"
 
