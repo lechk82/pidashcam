@@ -174,6 +174,11 @@ echo "* * * * * sudo node /home/core/modules/video/helpers/ensureAllClipsAreDeco
 sudo crontab cronJobs
 sudo rm cronJobs
 
+echo "========== Install Web  ============"
+
+cd ~/pidashcam
+sudo cp files/web/* /home/core/
+
 echo "========== Install Display  ============"
 
 sudo apt-get install cmake -y
