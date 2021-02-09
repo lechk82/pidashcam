@@ -124,7 +124,7 @@ sudo apt-get install python-smbus i2c-tools -y
 
 
 echo "========== Install Dride-core   ============"
-cd ~/pidashcam
+cd /home/pi/pidashcam
 sudo cp files/dride.zip /home/
 cd /home/
 # https://s3.amazonaws.com/dride/releases/dride/latest.zip
@@ -177,13 +177,13 @@ sudo rm cronJobs
 
 echo "========== Install Web  ============"
 
-cd ~/pidashcam
+cd /home/pi/pidashcam
 sudo cp files/web/* /home/core/
 
 echo "========== Install Display  ============"
 
 sudo apt-get install cmake -y
-cd ~
+cd /home/pi/
 git clone https://github.com/juj/fbcp-ili9341.git
 cd fbcp-ili9341
 sed -i '/#define DISPLAY_SPI_DRIVE_SETTINGS (0)/c\#define DISPLAY_SPI_DRIVE_SETTINGS (1 | BCM2835_SPI0_CS_CPOL | BCM2835_SPI0_CS_CPHA)' display.h
