@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Dashcam</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="jquery.mobile-1.4.5.min.css" />
+  <script src="jquery-1.11.1.min.js"></script>
+  <script src="jquery.mobile-1.4.5.min.js"></script>
+  
+  <link rel="stylesheet" href="theme-classic.css"/>
+  <link rel="stylesheet" href="animate.min.css">
+  <style>
+  body{
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: rgb(27, 27, 27);
+  }
+  .thumb {
+    height: 150px;
+    width: 200px;
+    position: absolute; z-index: 2;
+  }
+  .overlay {
+    position: relative; bottom: 0px; z-index: 3;
+    color: white;
+    background-color:rgba(0, 0, 0, 0.5);
+    display: block;
+    margin: 0;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 8px;
+    padding-right: 8px;
+    height: 15px;
+    font-size: 10pt;
+  }
+  .date {
+    display: inline-block;
+  width: 50%;
+    text-align: left;
+    margin: 0;
+  }
+
+  .time {
+    display: inline-block;
+  width: 50%;
+    text-align: right;
+    margin: 0;
+  }
+
+  .container{
+    width: 80%;
+    margin: 0 auto;
+  }
+  .grid {
+  }
+  .brick{
+    width: 200px;
+    height: 150px;
+    display: inline-block;
+    margin: 0;
+  }
+  .success {
+    background-color: darkgreen !important;
+  }
+  .error {
+    background-color: darkred !important;
+  }
+  </style>
+
+</head>
+<body>
+
+  <div data-role="page" date-theme="a" id="page">
+    <div data-role="panel" id="settings" >
+      <h2>Settings</h2>
+      <form>
+        <label for="rec">Recorder:</label>
+        <select name="rec" id="rec" data-role="slider">
+        <option value="off">Off</option>
+        <option value="on">On</option>
+        </select>
+        <!--
+        <label for="live">Live Mode:</label>
+        <select name="live" id="live" data-role="slider">
+        <option value="off">Off</option>
+        <option value="on">On</option>
+        </select>
+        -->
+        <label for="flip">Flip Video 180 deg:</label>
+        <select name="flip" id="flip" data-role="slider">
+        <option value="off">Off</option>
+        <option value="on">On</option>
+        </select>
+        <label for="res" class="select">Resolution:</label>
+        <select name="res" id="res" data-native-menu="false">
+        <option value="hd">720p</option>
+        <option value="fullhd">1080p</option>
+        </select>
+        <label for="fps">Fps:</label>
+        <input type="text" name="fps" id="fps">
+        <label for="reclen">Recording Length [min]:</label>
+        <input type="text" name="reclen" id="reclen">
+
+        <label for="apname">SSID:</label>
+        <input type="text" name="apname" id="apname" value="">
+        <label for="appw">Password</label>
+        <input type="text" name="appw" id="appw" value="">
+      </form>
+      <a href="" data-role="button" data-inline="true" id="save">save</a>
+    </div>
+    <div data-role="header">
+      <a href="#settings" class="ui-btn ui-btn-inline">Settings</a>
+      <h1>Dashcam Recordings</h1>
+      <a href="" data-role="button" data-inline="true" id="delallclips">Delete all Clips</a>
+    </div> 
+
+<div data-role="content">
+<div class="container"><div id="images" class="grid"></div></div>
+</div>
+</div> 
+
+
+<script>
+//var hostname = "192.168.2.11";
+setInterval(function(){
+    loadclips(); // this will run after every 5 seconds
+}, 5000);
+var settings = {};
+var nclips = 0;
+$( document ).on( "pageinit", "#page", function( event ) {
+  $("#apname").prop("disabled", true);
+  $("#appw").prop("disabled", true);
+  loadclips();  
+(function() {
+  //var hostname = "raspberrypi.local";
+ 
+
+  //var settingsAPI = "http://"+hostname+":9000/api/getSettings";
+  var settingsAPI = "api/getSettings";
+  $.getJSON( settingsAPI, {
+    format: "json"
+  })
+    .done(function( data ) {
+      console.log(data);
+      settings = data.settings;
+      //record
+      if(settings.videoRecord == true){
+        var myswitch = $( "#rec" );
+        myswitch[ 0 ].selectedIndex = 1;
+        myswitch.slider( "refresh" ); 
+      }
+      else{
+        var myswitch = $( "#rec" );
+        myswitch[ 0 ].selectedIndex = 0;
+        myswitch.slider( "refresh" ); 
+      }
+      // flip 180
+      if(settings.flipVideo == true){
+        var myswitch = $( "#flip" );
+        myswitch[ 0 ].selectedIndex = 1;
+        myswitch.slider( "refresh" ); 
+      }
+      else{
+        var myswitch = $( "#flip" );
+        myswitch[ 0 ].selectedIndex = 0;
+        myswitch.slider( "refresh" ); 
+      }
+      // resolution
+      if(settings.resolution == 720){
+        var myselect = $( "#res" );
+        myselect[0].selectedIndex = 0;
+        myselect.selectmenu( "refresh" );
+      }
+      else{
+        var myselect = $( "#res" );
+        myselect[0].selectedIndex = 1;
+        myselect.selectmenu( "refresh" );
+      }
+      $('#fps').val(settings.fps);
+      $('#reclen').val(settings.clipLength);
+      $('#apname').val(settings.netwrok.ssid);
+      $('#appw').val(settings.netwrok.password);
+    });
+
+    $( "#rec" ).change(function() {
+      var myswitch = $( "#rec" );
+      if(myswitch[ 0 ].selectedIndex == 1){
+        settings.videoRecord=true
+      }
+      else{
+        settings.videoRecord=false
+      }
+    });
+    $( "#flip" ).change(function() {
+      var myswitch = $( "#flip" );
+      if(myswitch[ 0 ].selectedIndex == 1){
+        settings.flipVideo=true
+      }
+      else{
+        settings.flipVideo=false
+      }
+    });
+    $( "#res" ).change(function() {
+      var myswitch = $( "#res" );
+      if(myswitch[ 0 ].selectedIndex == 1){
+        settings.resolution=1080;
+      }
+      else{
+        settings.resolution=720;
+      }
+    });
+
+// save
+    $( "#save" ).click(function() {
+      settings.netwrok.password = $( "#appw" ).val();
+      settings.netwrok.ssid = $( "#apname" ).val();
+      settings.clipLength = $( "#reclen" ).val();
+      settings.fps = $('#fps').val();
+      //console.log(settings);
+      //var url = "http://"+hostname+":9000/api/setSetting?fieldName=";
+      var url = "api/setSetting?fieldName=";
+      var err = 0;
+      $.getJSON( url + "videoRecord&fieldValue=" + settings.videoRecord, { format: "json" }).done(function( result ) {if(result.status != 1){ err++; }});
+      $.getJSON( url + "flipVideo&fieldValue=" + settings.flipVideo, { format: "json" }).done(function( result ) {if(result.status != 1){ err++; }});
+      $.getJSON( url + "resolution&fieldValue=" + settings.resolution, { format: "json" }).done(function( result ) {if(result.status != 1){ err++; }});
+      $.getJSON( url + "fps&fieldValue=" + settings.fps, { format: "json" }).done(function( result ) {if(result.status != 1){ err++; }});
+      $.getJSON( url + "clipLength&fieldValue=" + settings.clipLength, { format: "json" }).done(function( result ) {if(result.status != 1){ err++; }});
+      //$.getJSON( url + "netwrokSSID&fieldValue=" + settings.netwrok.ssid, { format: "json" }).done(function( result ) {if(result.status != 1){ err++; }});
+      //$.getJSON( url + "netwrokPassword&fieldValue=" + settings.netwrok.password, { format: "json" }).done(function( result ) {if(result.status != 1){ err++; }});
+      //$.getJSON( url + "netwrok&fieldValue=" + JSON.parse(settings.netwrok), { format: "string" }).done(function( result ) {if(result.status != 1){ err++; }});
+      if(err == 0){$.mobile.toast({message: "Successful", classOnOpen: "success animated bounceInUp"});}
+      else {$.mobile.toast({message: "Error", classOnOpen: "error animated bounceInUp"});}
+    });
+})()
+});
+
+function loadclips(){
+  //var clipsAPI = "http://"+hostname+":9000/api/getClips";
+  var clipsAPI = "api/getClips";
+  $.getJSON( clipsAPI, {
+    format: "json"
+  })
+    .done(function( data ) {
+      var nclipsnew =  Object.keys(data.data).length;
+      if(nclipsnew > nclips){
+        nclips = nclipsnew;
+        $( "#images" ).empty();
+        $.each( data.data.reverse(), function( i, item ) {
+          var d = new Date(item.timestamp).toLocaleDateString("de-DE");
+          var t = new Date(item.timestamp).toLocaleTimeString("de-DE");
+          $brick = $('<div>').addClass('brick');
+          $link = $('<a>').attr('href', "http://raspberrypi.local:9000" + item.clip).wrap($brick).parent();
+          $date = $('<span>').addClass('date').text(d);
+          $time = $('<span>').addClass('time').text(t);
+          $overlay = $('<span>').addClass('overlay').append($date).append($time);;
+          $link.append($overlay);
+          $image = $( "<img>" ).addClass('thumb').attr( "src", "http://raspberrypi.local:9000" + item.thumb ).wrap($link).parent().parent();
+          
+          $image.appendTo( "#images" );
+        });
+      }
+    });
+  }
+
+$("#delallclips").click(function(e) {
+    e.preventDefault();
+    $.ajax({
+        type: "GET",
+        //url: "http://"+hostname+":9000/api/deleteAllClips",
+        url: "api/deleteAllClips",
+        success: function(result) {
+           if(result.status == 1){
+            $.mobile.toast({
+              message: "Successful",
+              classOnOpen: "success animated bounceInUp"
+            });
+          loadclips();
+           }
+           else {
+            $.mobile.toast({
+              message: "Error",
+              classOnOpen: "error animated bounceInUp"
+          });
+           }
+        },
+        error: function(result) {
+          $.mobile.toast({
+              message: "Error",
+              classOnOpen: "error animated bounceInUp"
+          });
+        }
+    });
+    
+});
+
+</script>
+ 
+<script src="jquery.mobile.toast.min.js"></script>
+</body>
+</html>
