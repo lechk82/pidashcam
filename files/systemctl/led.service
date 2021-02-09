@@ -1,0 +1,18 @@
+[Unit]
+Description=Control the LED of your Dride
+Documentation=https://dride.io/documentation
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+ExecStart=/home/core/modules/led/bin/main welcome
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+

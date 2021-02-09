@@ -1,0 +1,14 @@
+[Unit]
+Description=Control the RTC service of your Dride
+Documentation=https://dride.io/documentation
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/sbin/hwclock -s
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

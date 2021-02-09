@@ -1,0 +1,34 @@
+#! /bin/sh
+# /etc/init.d/dride-core
+
+### BEGIN INIT INFO
+# Provides:          dride-core
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: will run the main dride-core process
+# Description:       
+### END INIT INFO
+
+
+case "$1" in
+  start)
+
+    echo "Starting dride-core"
+	# TODO: refactor this to be done internally
+	# pull up resistor on pin 16
+	sudo python /home/core/daemons/bluetooth/initPin.py
+    ;;
+  stop)
+    echo "Stopping dride-core"
+    # kill application you want to stop
+    killall python
+    ;;
+  *)
+    echo "Usage: /etc/init.d/dride-core{start|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0

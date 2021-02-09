@@ -1,0 +1,19 @@
+[Unit]
+Description=Control the Record service of your Dride
+Documentation=https://dride.io/documentation
+After=network.target
+
+[Service]
+Environment=NODE_PORT=3001
+Type=simple
+User=pi
+ExecStart=/usr/bin/node /home/core/modules/video/index.js
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+
